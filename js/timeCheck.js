@@ -12,19 +12,19 @@ const TimeCheck = {
    */
   isClassActive(startTime, endTime) {
     if (!startTime || !endTime) return false;
-    
+
     const now = new Date();
     const currentHours = now.getHours();
     const currentMinutes = now.getMinutes();
-    
+
     const [startH, startM] = startTime.split(':').map(Number);
     const [endH, endM] = endTime.split(':').map(Number);
-    
+
     // Convert everything to minutes for easier comparison
     const nowMinutes = currentHours * 60 + currentMinutes;
     const startMinutes = startH * 60 + startM;
     const endMinutes = endH * 60 + endM;
-    
+
     return nowMinutes >= startMinutes && nowMinutes < endMinutes;
   },
 
@@ -33,16 +33,16 @@ const TimeCheck = {
    */
   isClassEnded(endTime) {
     if (!endTime) return false;
-    
+
     const now = new Date();
     const currentHours = now.getHours();
     const currentMinutes = now.getMinutes();
-    
+
     const [endH, endM] = endTime.split(':').map(Number);
-    
+
     const nowMinutes = currentHours * 60 + currentMinutes;
     const endMinutes = endH * 60 + endM;
-    
+
     return nowMinutes >= endMinutes;
   },
 
@@ -50,10 +50,13 @@ const TimeCheck = {
    * Returns today's date in YYYY-MM-DD format based on local time.
    */
   getTodayDateString() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+    return this.formatDate(new Date());
+  },
+
+  formatDate(dateObj) {
+    const year = dateObj.getFullYear();
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(dateObj.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   },
 

@@ -9,6 +9,11 @@ const AttendanceApp = {
      */
     init() {
         console.log("Attendance App Logic Initialized");
+        try {
+            if (window.Backfill) Backfill.run();
+        } catch (e) {
+            console.error("Backfill error:", e);
+        }
     },
 
     /**

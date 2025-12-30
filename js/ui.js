@@ -168,11 +168,40 @@ const UI = {
     },
 
     updateStats(classes) {
-        const present = classes.filter(c => c.computedStatus === 'present').length;
-        const total = classes.length;
-        document.getElementById('today-stats').textContent = `${present}/${total}`;
-        // Streak stats placeholder
-        document.getElementById('streak-stats').textContent = `🔥 ${present > 0 ? 1 : 0}`;
+        const records = Storage.getAttendanceRecords();
+        const todayStr = TimeCheck.getTodayDateString();
+
+        // Today's stats
+        const todayRecords = records.filter(r => r.date === todayStr && r.status === 'present');
+        const presentCount = todayRecords.length;
+        const totalToday = classes.length;
+
+        document.getElementById('today-stats').textContent = `${presentCount}/${totalToday}`;
+
+        // Simple Streak Logic: Count consecutive days (working backwards from today or yesterday) where at least one class was attended
+        const dates = [...new Set(records.filter(r => r.status === 'present').map(r => r.date))].sort().reverse();
+
+        let streak = 0;
+        if (dates.length > 0) {
+            let currentCheck = new Date();
+            // If today has no attendance yet, start checking from yesterday
+            if (!dates.includes(todayStr)) {
+                currentCheck.setDate(currentCheck.getDate() - 1);
+            }
+
+            // Loop back
+            while (true) {
+                const dateString = TimeCheck.formatDate(currentCheck);
+                if (dates.includes(dateString)) {
+                    streak++;
+                    currentCheck.setDate(currentCheck.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        document.getElementById('streak-stats').textContent = `🔥 ${streak}`;
     },
 
     renderHistory() {

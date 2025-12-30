@@ -70,6 +70,16 @@ const Storage = {
         }
     },
 
+    // --- System Metadata ---
+
+    getLastOpenDate() {
+        return localStorage.getItem('attendance_last_open_date');
+    },
+
+    setLastOpenDate(dateStr) {
+        localStorage.setItem('attendance_last_open_date', dateStr);
+    },
+
     // --- Attendance Records Management ---
 
     getAttendanceRecords() {
@@ -110,6 +120,21 @@ const Storage = {
 
         localStorage.setItem(this.KEYS.RECORDS, JSON.stringify(records));
         return newRecord;
+    },
+
+    /**
+     * Internal use: Mark attendance for a specific past date
+     */
+    markAttendanceDirectly(classId, dateStr, status) {
+        const records = this.getAttendanceRecords();
+        const newRecord = {
+            classId,
+            date: dateStr,
+            status,
+            timestamp: new Date().toISOString()
+        };
+        records.push(newRecord);
+        localStorage.setItem(this.KEYS.RECORDS, JSON.stringify(records));
     },
 
     /**
