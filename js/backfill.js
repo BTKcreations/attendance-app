@@ -3,7 +3,10 @@
  * Handles auto-marking of past classes as "missed" if the app wasn't opened.
  */
 
-const Backfill = {
+import { Storage } from './storage.js';
+import { TimeCheck } from './timeCheck.js';
+
+export const Backfill = {
     run() {
         const lastDate = Storage.getLastOpenDate();
         const today = TimeCheck.getTodayDateString();

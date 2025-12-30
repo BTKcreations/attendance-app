@@ -1,11 +1,11 @@
 /**
  * storage.js
- * Wrapper for localStorage to manage app data.
+ * Wrapper for LocalStorage to manage data persistence.
  */
 
-const Storage = {
+export const Storage = {
     KEYS: {
-        CLASSES: 'attendance_app_classes',
+        CLASSES: 'attendance_classes',
         RECORDS: 'attendance_app_records'
     },
 

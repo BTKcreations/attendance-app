@@ -1,16 +1,20 @@
+import { Storage } from './storage.js';
+import { Backfill } from './backfill.js';
+
 /**
  * attendance.js
- * Main business logic layer.
+ * Core business logic for managing classes and attendance.
+ * Separated from UI to keep code clean.
  */
 
-const AttendanceApp = {
+export const AttendanceApp = {
     /**
-     * Initialize or migration logic if needed
+     * Initialize logic (e.g. backfill checks)
      */
     init() {
         console.log("Attendance App Logic Initialized");
         try {
-            if (window.Backfill) Backfill.run();
+            Backfill.run();
         } catch (e) {
             console.error("Backfill error:", e);
         }

@@ -1,11 +1,11 @@
 /**
  * timeCheck.js
- * Handles all time-related validations and formatting.
+ * Utilities for time manipulation and validation.
  */
 
-const TimeCheck = {
+export const TimeCheck = {
   /**
-   * Checks if the current time is within the start and end time window.
+   * Check if current time is within start and end time (HH:MM)window.
    * @param {string} startTime - "HH:MM" 24h format
    * @param {string} endTime - "HH:MM" 24h format
    * @returns {boolean}

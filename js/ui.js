@@ -1,9 +1,13 @@
+import { AttendanceApp } from './attendance.js';
+import { Storage } from './storage.js';
+import { TimeCheck } from './timeCheck.js';
+
 /**
  * ui.js
  * Handles all DOM interactions and rendering.
  */
 
-const UI = {
+export const UI = {
     init() {
         this.bindEvents();
         this.renderDate();
@@ -464,5 +468,4 @@ const UI = {
     }
 };
 
-// Initialize App
-document.addEventListener('DOMContentLoaded', () => UI.init());
+// End of UI Module
