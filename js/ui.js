@@ -142,9 +142,19 @@ const UI = {
                 btnText = 'Wait for ' + TimeCheck.formatTime(cls.startTime);
             }
 
+            // Calculate Stats for this subject
+            const subjectRecords = Storage.getAttendanceRecords().filter(r => r.classId === cls.id);
+            const totalAttended = subjectRecords.filter(r => r.status === 'present').length;
+            const totalMissed = subjectRecords.filter(r => r.status === 'missed').length;
+            const totalSessions = totalAttended + totalMissed;
+            const percentage = totalSessions > 0 ? Math.round((totalAttended / totalSessions) * 100) : 0;
+
             card.className = cardClass;
             card.innerHTML = `
         <div class="card-class-actions">
+           <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: auto;">
+                ${percentage}% Attendance (${totalAttended}/${totalSessions})
+           </span>
            <button class="btn-mini delete" onclick="UI.handleDeleteClass('${cls.id}')" title="Delete">🗑️</button>
         </div>
         <div class="card-header">
@@ -208,6 +218,10 @@ const UI = {
         const list = document.getElementById('history-list');
         const records = Storage.getAttendanceRecords().reverse(); // Newest first
 
+        // --- Heatmap Logic ---
+        if (!this.currentHeatmapRange) this.currentHeatmapRange = 'year';
+        this.renderHeatmap(this.currentHeatmapRange);
+
         if (records.length === 0) {
             list.innerHTML = '<p class="empty-state">No history yet.</p>';
             return;
@@ -228,16 +242,82 @@ const UI = {
 
             grouped[date].forEach(r => {
                 const className = classesMap[r.classId] || 'Unknown Class';
+                let statusIcon = '✅ Present';
+                let statusColor = 'var(--success)';
+
+                if (r.status === 'missed') {
+                    statusIcon = '❌ Missed';
+                    statusColor = 'var(--danger)';
+                }
+
                 html += `
           <div style="padding: 15px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05);">
             <span>${className}</span>
-            <span style="color: var(--success);">✅ Present</span>
+            <span style="color: ${statusColor};">${statusIcon}</span>
           </div>
         `;
             });
         });
 
         list.innerHTML = html;
+    },
+
+    setHeatmapRange(range) {
+        this.currentHeatmapRange = range;
+
+        // Update Buttons
+        document.querySelectorAll('.range-btn').forEach(btn => btn.classList.remove('active'));
+        // This is a bit brittle, finding by text content would be better or ID
+        const btns = document.querySelectorAll('.range-btn');
+        if (range === 'year' && btns[0]) btns[0].classList.add('active');
+        if (range === 'month' && btns[1]) btns[1].classList.add('active');
+        if (range === 'week' && btns[2]) btns[2].classList.add('active');
+
+        this.renderHeatmap(range);
+    },
+
+    renderHeatmap(range) {
+        const grid = document.getElementById('heatmap-grid');
+        grid.className = `heatmap-grid ${range}`;
+        grid.innerHTML = ''; // Clear
+
+        const today = new Date();
+        const records = Storage.getAttendanceRecords();
+
+        // Determine number of days to show
+        let daysToShow = 365;
+        if (range === 'month') daysToShow = 30;
+        if (range === 'week') daysToShow = 7;
+
+        // Generate dates
+        const startDate = new Date();
+        startDate.setDate(today.getDate() - daysToShow + 1);
+
+        // Pre-process records for quick lookup
+        // Map: "YYYY-MM-DD" -> count
+        const counts = {};
+        records.forEach(r => {
+            if (r.status === 'present') {
+                counts[r.date] = (counts[r.date] || 0) + 1;
+            }
+        });
+
+        for (let i = 0; i < daysToShow; i++) {
+            const d = new Date(startDate);
+            d.setDate(startDate.getDate() + i);
+            const dateStr = TimeCheck.formatDate(d);
+
+            const count = counts[dateStr] || 0;
+            let level = 0;
+            if (count > 0) level = 1;
+            if (count > 2) level = 2; // Arbitrary thresholds
+            if (count > 4) level = 3;
+
+            const cell = document.createElement('div');
+            cell.className = `heat-cell heat-level-${level}`;
+            cell.setAttribute('data-title', `${dateStr}: ${count} classes`);
+            grid.appendChild(cell);
+        }
     },
 
     // Actions

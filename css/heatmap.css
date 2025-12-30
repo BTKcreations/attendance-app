@@ -1,0 +1,114 @@
+/* Heatmap */
+.heatmap-container {
+    padding: 20px;
+    background: #151f32;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.range-selector {
+    display: flex;
+    background: #0f172a;
+    padding: 4px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #334155;
+}
+
+.range-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.range-btn.active {
+    background: #334155;
+    color: white;
+}
+
+.heatmap-grid {
+    display: grid;
+    gap: 4px;
+    width: 100%;
+}
+
+/* Year View (Github style 53 cols) */
+.heatmap-grid.year {
+    grid-template-columns: repeat(53, 1fr);
+    gap: 2px;
+}
+
+/* Month View (7 cols) */
+.heatmap-grid.month {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+/* Week View (7 cols - Big) */
+.heatmap-grid.week {
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+.heat-cell {
+    aspect-ratio: 1;
+    border-radius: 2px;
+    background: #1e293b;
+    position: relative;
+    cursor: pointer;
+}
+
+.heatmap-grid.month .heat-cell {
+    border-radius: 4px;
+}
+
+.heatmap-grid.week .heat-cell {
+    border-radius: 8px;
+    height: 40px;
+}
+
+/* Levels */
+.heat-level-0 {
+    background: #334155;
+    opacity: 0.3;
+}
+
+.heat-level-1 {
+    background: #064e3b;
+}
+
+/* Dark Green */
+.heat-level-2 {
+    background: #10b981;
+}
+
+/* Green */
+.heat-level-3 {
+    background: #34d399;
+}
+
+/* Bright Green */
+
+/* Tooltip (Simple) */
+.heat-cell:hover::after {
+    content: attr(data-title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 5px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
+}
