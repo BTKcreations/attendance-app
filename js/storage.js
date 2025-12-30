@@ -31,6 +31,45 @@ const Storage = {
         localStorage.setItem(this.KEYS.CLASSES, JSON.stringify(classes));
     },
 
+    updateClass(classId, updatedData) {
+        let classes = this.getClasses();
+        const index = classes.findIndex(c => c.id === classId);
+        if (index !== -1) {
+            classes[index] = { ...classes[index], ...updatedData };
+            localStorage.setItem(this.KEYS.CLASSES, JSON.stringify(classes));
+            return true;
+        }
+        return false;
+    },
+
+    // --- Data Portability ---
+
+    exportData() {
+        const data = {
+            classes: this.getClasses(),
+            records: this.getAttendanceRecords(),
+            version: 1,
+            exportedAt: new Date().toISOString()
+        };
+        return JSON.stringify(data, null, 2);
+    },
+
+    importData(jsonString) {
+        try {
+            const data = JSON.parse(jsonString);
+            if (data.classes && Array.isArray(data.classes)) {
+                localStorage.setItem(this.KEYS.CLASSES, JSON.stringify(data.classes));
+            }
+            if (data.records && Array.isArray(data.records)) {
+                localStorage.setItem(this.KEYS.RECORDS, JSON.stringify(data.records));
+            }
+            return true;
+        } catch (e) {
+            console.error("Import failed", e);
+            return false;
+        }
+    },
+
     // --- Attendance Records Management ---
 
     getAttendanceRecords() {

@@ -26,7 +26,10 @@ const UI = {
 
         // FAB
         const fab = document.getElementById('fab-add');
-        if (fab) fab.addEventListener('click', () => this.showModal('add-class-modal'));
+        if (fab) fab.addEventListener('click', () => {
+            document.getElementById('add-class-form').reset();
+            this.showModal('add-class-modal');
+        });
 
         // Modal Closing
         document.querySelectorAll('.close-modal').forEach(btn => {
@@ -99,8 +102,8 @@ const UI = {
         if (classes.length === 0) {
             container.innerHTML = `
         <div class="empty-state">
-           <p>No classes added for today.</p>
-           <button class="btn-text" onclick="UI.showModal('add-class-modal')">+ Add Your First Class</button>
+           <p>No classes scheduled for today.</p>
+           <button class="btn-text" onclick="UI.showModal('add-class-modal')">+ Add Class</button>
         </div>
       `;
             return;
@@ -141,6 +144,9 @@ const UI = {
 
             card.className = cardClass;
             card.innerHTML = `
+        <div class="card-class-actions">
+           <button class="btn-mini delete" onclick="UI.handleDeleteClass('${cls.id}')" title="Delete">🗑️</button>
+        </div>
         <div class="card-header">
             <div>
                 <div class="class-name">${cls.name}</div>
@@ -165,9 +171,7 @@ const UI = {
         const present = classes.filter(c => c.computedStatus === 'present').length;
         const total = classes.length;
         document.getElementById('today-stats').textContent = `${present}/${total}`;
-
-        // Streak logic is simplified for now
-        // In a real app we would calculate consecutive days from history
+        // Streak stats placeholder
         document.getElementById('streak-stats').textContent = `🔥 ${present > 0 ? 1 : 0}`;
     },
 
@@ -214,8 +218,19 @@ const UI = {
         const start = document.getElementById('inp-start').value;
         const end = document.getElementById('inp-end').value;
 
+        // Get Checked Days
+        const days = [];
+        document.querySelectorAll('.days-selector input:checked').forEach(cb => {
+            days.push(parseInt(cb.value));
+        });
+
+        if (days.length === 0) {
+            alert("Please select at least one day for this class.");
+            return;
+        }
+
         try {
-            AttendanceApp.addNewClass(name, start, end);
+            AttendanceApp.addNewClass(name, start, end, days);
             this.hideModal();
             document.getElementById('add-class-form').reset();
             this.renderDashboard();
@@ -228,13 +243,51 @@ const UI = {
         try {
             const success = AttendanceApp.checkIn(classId);
             if (success) {
-                // Trigger haptic feedback if available (mobile)
                 if (navigator.vibrate) navigator.vibrate(50);
                 this.renderDashboard();
             }
         } catch (e) {
             alert(e.message);
         }
+    },
+
+    handleDeleteClass(id) {
+        if (confirm('Are you sure you want to delete this class? It cannot be undone.')) {
+            AttendanceApp.deleteClass(id);
+            this.renderDashboard();
+        }
+    },
+
+    // Settings
+    showSettings() {
+        this.showModal('settings-modal');
+    },
+
+    handleExport() {
+        const data = Storage.exportData();
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `attendance-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+    },
+
+    handleImport(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const success = Storage.importData(e.target.result);
+            if (success) {
+                alert("Data imported successfully!");
+                location.reload();
+            } else {
+                alert("Failed to import data. Invalid file.");
+            }
+        };
+        reader.readAsText(file);
     },
 
     // Modal helpers

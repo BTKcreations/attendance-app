@@ -18,7 +18,17 @@ const AttendanceApp = {
         const classes = Storage.getClasses();
         const todayStr = TimeCheck.getTodayDateString();
 
-        return classes.map(cls => {
+        // Day of week: 0 (Sun) - 6 (Sat)
+        const currentDay = new Date().getDay();
+
+        // Filter by day
+        const todaysClasses = classes.filter(cls => {
+            // If 'days' is missing/empty, we assume Every Day (migration fallback)
+            if (!cls.days || cls.days.length === 0) return true;
+            return cls.days.includes(currentDay);
+        });
+
+        return todaysClasses.map(cls => {
             // Get saved status from storage
             const record = Storage.getTodayStatus(cls.id);
 
@@ -73,7 +83,7 @@ const AttendanceApp = {
     /**
      * Add a new class with simple validation
      */
-    addNewClass(name, startTime, endTime) {
+    addNewClass(name, startTime, endTime, days = []) {
         if (startTime >= endTime) {
             throw new Error("Start time must be before end time.");
         }
@@ -81,7 +91,16 @@ const AttendanceApp = {
             name,
             startTime,
             endTime,
-            days: [] // For future recurring logic
+            days: days // Array of integers [1, 3, 5] etc.
         });
+    },
+
+    deleteClass(id) {
+        Storage.deleteClass(id);
+    },
+
+    updateClass(id, name, start, end, days) {
+        if (start >= end) throw new Error("Start time must be before end time.");
+        return Storage.updateClass(id, { name, startTime: start, endTime: end, days });
     }
 };
