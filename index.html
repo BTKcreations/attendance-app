@@ -14,6 +14,7 @@
     <!-- Styles -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/heatmap.css">
+    <link rel="stylesheet" href="css/categories.css">
 </head>
 
 <body>
@@ -77,6 +78,10 @@
                     </div>
                 </div>
 
+                <div id="category-stats" class="category-stats-container">
+                    <!-- Category stats injected by JS -->
+                </div>
+
                 <div class="history-list" id="history-list">
                     <!-- History items -->
                     <p class="empty-state">No history records yet.</p>
@@ -124,6 +129,19 @@
                     <button class="close-modal">&times;</button>
                 </div>
                 <form id="add-class-form">
+                    <div class="form-group">
+                        <label>Category</label>
+                        <input type="text" id="inp-category" placeholder="e.g. School, Sports, Coaching"
+                            list="category-suggestions">
+                        <datalist id="category-suggestions">
+                            <option value="School">
+                            <option value="College">
+                            <option value="Coaching">
+                            <option value="Sports">
+                            <option value="Self Study">
+                        </datalist>
+                    </div>
+
                     <div class="form-group">
                         <label>Class Name</label>
                         <input type="text" id="inp-name" placeholder="e.g. Operating Systems" required>

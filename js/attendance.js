@@ -88,15 +88,16 @@ const AttendanceApp = {
     /**
      * Add a new class with simple validation
      */
-    addNewClass(name, startTime, endTime, days = []) {
+    addNewClass(name, startTime, endTime, days = [], category = 'General') {
         if (startTime >= endTime) {
             throw new Error("Start time must be before end time.");
         }
         return Storage.addClass({
             name,
+            category,
             startTime,
             endTime,
-            days: days // Array of integers [1, 3, 5] etc.
+            days: days
         });
     },
 
@@ -104,8 +105,8 @@ const AttendanceApp = {
         Storage.deleteClass(id);
     },
 
-    updateClass(id, name, start, end, days) {
+    updateClass(id, name, start, end, days, category) {
         if (start >= end) throw new Error("Start time must be before end time.");
-        return Storage.updateClass(id, { name, startTime: start, endTime: end, days });
+        return Storage.updateClass(id, { name, startTime: start, endTime: end, days, category });
     }
 };

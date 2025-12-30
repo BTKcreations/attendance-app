@@ -259,7 +259,62 @@ const UI = {
             });
         });
 
+        // --- Category Stats ---
+        this.renderCategoryStats();
+
         list.innerHTML = html;
+    },
+
+    renderCategoryStats() {
+        const container = document.getElementById('category-stats');
+        const classes = Storage.getClasses();
+        const records = Storage.getAttendanceRecords();
+
+        if (classes.length === 0) {
+            container.innerHTML = '';
+            return;
+        }
+
+        // 1. Group classes by Category
+        // Map: CategoryName -> [ClassId, ClassId...]
+        const catMap = {};
+        classes.forEach(c => {
+            const cat = c.category || 'General';
+            if (!catMap[cat]) catMap[cat] = [];
+            catMap[cat].push(c.id);
+        });
+
+        // 2. Calculate Stats per Category
+        let html = '';
+        Object.keys(catMap).forEach(cat => {
+            const classIds = catMap[cat];
+
+            // Filter records for these classes
+            const catRecords = records.filter(r => classIds.includes(r.classId));
+            const attended = catRecords.filter(r => r.status === 'present').length;
+            const missed = catRecords.filter(r => r.status === 'missed').length;
+            const total = attended + missed;
+
+            const percent = total > 0 ? Math.round((attended / total) * 100) : 0;
+
+            html += `
+            <div class="cat-stat-card">
+                <div class="cat-header">
+                    <span>${cat}</span>
+                    <span style="color: var(--accent);">${percent}%</span>
+                </div>
+                <div class="cat-progress-bg">
+                    <div class="cat-progress-fill" style="width: ${percent}%"></div>
+                </div>
+                <div class="cat-meta">
+                    <span>${attended} Attended</span>
+                    <span>${total} Total</span>
+                </div>
+            </div>
+            `;
+        });
+
+        container.innerHTML = html;
     },
 
     setHeatmapRange(range) {
@@ -324,6 +379,7 @@ const UI = {
 
     handleAddClass() {
         const name = document.getElementById('inp-name').value;
+        const category = document.getElementById('inp-category').value.trim() || 'General';
         const start = document.getElementById('inp-start').value;
         const end = document.getElementById('inp-end').value;
 
@@ -339,7 +395,7 @@ const UI = {
         }
 
         try {
-            AttendanceApp.addNewClass(name, start, end, days);
+            AttendanceApp.addNewClass(name, start, end, days, category);
             this.hideModal();
             document.getElementById('add-class-form').reset();
             this.renderDashboard();
